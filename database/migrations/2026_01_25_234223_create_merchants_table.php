@@ -18,10 +18,8 @@ return new class extends Migration
              $table->string('phone', 20)->nullable();
              $table->string('password');
              $table->string('business_name')->nullable();
-             $table->string('trade_license')->nullable();
              $table->boolean('is_active')->default(false);
              $table->enum('status', ['pending', 'approved', 'suspended', 'blocked'])->default('pending');
-
              $table->timestamps();
         });
     }
