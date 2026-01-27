@@ -26,7 +26,7 @@ class MerchantController extends Controller
             'password'      => Hash::make($request->password),
         ]);
 
-        logger('merchant create', $Merchant->toArray());
+        // logger('merchant create', $Merchant->toArray());
 
         return response()->json([
             'message' => 'merchant account created',
