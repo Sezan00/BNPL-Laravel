@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function registerUser(Request $request)
+    public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|max:30',
@@ -31,7 +31,7 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function loginUser(Request $request)
+    public function login(Request $request)
     {
         $validate = $request->validate([
             'email' => 'required|email',
@@ -73,10 +73,4 @@ class AuthController extends Controller
         'message' => 'Logout successful'
     ], 200);
 }
-
-    public function index(){
-        $user = User::all();
-
-        return response()->json(['user' => $user]);
-    }
 }

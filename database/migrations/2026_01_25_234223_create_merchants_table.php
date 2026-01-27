@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('merchants', function (Blueprint $table) {
              $table->id();
+             $table->foreignId('document_id')->nullable()->constrained('documents')->nullOnDelete();
+             $table->string('document_number')->nullable();
              $table->string('merchant_name');
              $table->string('email')->unique();
              $table->string('phone', 20)->nullable();
