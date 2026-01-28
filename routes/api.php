@@ -13,6 +13,9 @@ Route::post('register/merchant', [MerchantController::class, 'register']);
 Route::post('login/merchant', [MerchantController::class, 'login']);
 Route::get('document', [DocumentController::class, 'index']);
 
+Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController::class, 'merchantLogout']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
