@@ -18,5 +18,4 @@ Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController:
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
-
 });
