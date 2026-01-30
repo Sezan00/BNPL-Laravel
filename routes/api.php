@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MerchantController;
 use Illuminate\Support\Facades\Route;
@@ -18,4 +19,7 @@ Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController:
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+
+    Route::get('card/setup-intent', [CardController::class, 'create']);
+    Route::post('card/store', [CardController::class, 'store']);
 });
