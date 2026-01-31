@@ -57,20 +57,30 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
 
-    if ($user) {
-        /** @var PersonalAccessToken|null $token */
-        $token = $user->currentAccessToken();
+        if ($user) {
+            /** @var PersonalAccessToken|null $token */
+            $token = $user->currentAccessToken();
 
-        if ($token) {
-            $token->delete();
+            if ($token) {
+                $token->delete();
+            }
         }
+
+        return response()->json([
+            'message' => 'Logout successful'
+        ], 200);
     }
 
-    return response()->json([
-        'message' => 'Logout successful'
-    ], 200);
-}
+    public function index(){
+        $user = Auth::user();
+
+        return response()->json([
+             'name' => $user->name,
+            'email' => $user->email,
+            'balance' => $user->balance,
+        ]);
+    }
 }

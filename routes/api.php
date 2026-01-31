@@ -18,6 +18,8 @@ Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController:
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    //fetching user data to user dashboard
+    Route::get('/user-data', [AuthController::class, 'index']);
     Route::post('logout', [AuthController::class, 'logout']);
 
     Route::get('card/setup-intent', [CardController::class, 'create']);

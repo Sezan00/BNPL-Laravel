@@ -6,10 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {   
+    use Billable;
      use HasApiTokens, HasFactory, Notifiable;
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -24,6 +26,9 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
+        'credit_limit',
+        'balance',
+        'used_credit',
     ];
 
     /**
