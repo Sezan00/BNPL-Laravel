@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
-    public function sendPayment(Request $request){
+    public function sendPayment(Request $request)
+    {
 
         $sender = Auth::user();
         $request->validate([
@@ -20,42 +21,42 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:1',
         ]);
 
-       $receiver     = null;
-       $receiverType = null;  
+        $receiver     = null;
+        $receiverType = null;
 
-       $merchant = Merchant::where('phone', $request->phone)->first();
-       if($merchant){
-        $receiver = $merchant;
-        $receiverType = 'merchant';
-       } else {
-        $user = User::where('phone', $request->phone)->first();
-         if(!$user) return response()->json(['Receiver not found'], 401);
-         $receiver = $user;
-         $receiverType = 'user';
-       }
+        $merchant = Merchant::where('phone', $request->phone)->first();
+        if ($merchant) {
+            $receiver = $merchant;
+            $receiverType = 'merchant';
+        } else {
+            $user = User::where('phone', $request->phone)->first();
+            if (!$user) return response()->json(['Receiver not found'], 401);
+            $receiver = $user;
+            $receiverType = 'user';
+        }
 
-       if($sender->balance < $request->amount)
-        return response()->json(['message'=>'Insufficient balance'],422);
+        if ($sender->balance < $request->amount)
+            return response()->json(['message' => 'Insufficient balance'], 422);
 
-       try {
+        try {
             DB::beginTransaction();
 
             $payment = Payment::create([
-                    'sender_id'     => $sender->id,
-                    'receiver_type' => $receiverType,
-                    'amount'        => $request->amount,
-                    'receiver_id'   => $receiver->id,
-                    'status'        => 'success'   
-                ]);
+                'sender_id'     => $sender->id,
+                'receiver_type' => $receiverType,
+                'amount'        => $request->amount,
+                'receiver_id'   => $receiver->id,
+                'status'        => 'success'
+            ]);
 
             Transaction::create([
-           'user_id' => $receiverType === 'user' ? $receiver->id : null,
-            'merchant_id' => $receiverType === 'merchant' ? $receiver->id : null,
-            'type' => 'credit',
-            'amount' => $request->amount,
-            'balance_after' => $receiver->balance + $request->amount,
-            'payment_id' => $payment->id,
-            'description' => "Payment received from user {$sender->id}",
+                'user_id' => $receiverType === 'user' ? $receiver->id : null,
+                'merchant_id' => $receiverType === 'merchant' ? $receiver->id : null,
+                'type' => 'credit',
+                'amount' => $request->amount,
+                'balance_after' => $receiver->balance + $request->amount,
+                'payment_id' => $payment->id,
+                'description' => "Payment received from user {$sender->id}",
             ]);
 
             $sender->decrement('balance', $request->amount);
@@ -68,7 +69,7 @@ class PaymentController extends Controller
                 'description' => "Payment received from user {$sender->id}"
             ];
 
-            if($receiverType === 'user'){
+            if ($receiverType === 'user') {
                 $transactionData['user_id'] = $receiver->id;
             } else {
                 $transactionData['merchant_id'] = $receiver->id;
@@ -80,15 +81,15 @@ class PaymentController extends Controller
             DB::commit();
 
             return response()->json([
-                'message'=>'Payment successful',
-                'receiver_type'=>$receiverType
+                'message' => 'Payment successful',
+                'receiver_type' => $receiverType
             ]);
-       } catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
                 'message' => "Somethig went wrong!",
                 "errors" => $th->getMessage()
             ]);
-       }
+        }
     }
 }
