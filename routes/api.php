@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MerchantController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 //user Account
 Route::post('register', [AuthController::class, 'register']);
@@ -24,4 +25,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('card/setup-intent', [CardController::class, 'create']);
     Route::post('card/store', [CardController::class, 'store']);
+    Route::post('send-payment', [PaymentController::class, 'sendPayment']);
 });

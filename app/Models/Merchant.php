@@ -38,4 +38,8 @@ class Merchant extends Authenticatable
     public function document(){
         return $this->belongsTo(Document::class);
     }
+
+       public function transactions(){
+        return $this->hasMany(Transaction::class, 'merchant_id');
+    }
 }
