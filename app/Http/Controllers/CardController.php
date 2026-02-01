@@ -31,18 +31,19 @@ class CardController extends Controller
         $user->updateDefaultPaymentMethod($paymentMethodID);
 
         // $extraCredit = 500;
-        // if (bccomp($user->credit_limit, '0.00', 2) === 0) {
-        //     $update = $user->update([
-        //         'credit_limit' => $extraCredit,
-        //         'balance' => $user->balance + $extraCredit,
-        //     ]);
-        // }
+            // if (bccomp($user->credit_limit, '0.00', 2) === 0) {
+            //     $update = $user->update([
+            //         'credit_limit' => $extraCredit,
+            //         'balance' => $user->balance + $extraCredit,
+            //     ]);
+            // }
+
+            
          $extraCredit = 500;
 
         if($user->credit_limit == 0){
             $update = $user->update([
                'credit_limit' => $extraCredit,
-                'balance' => $user->balance + $extraCredit,
             ]);
         }
 
@@ -53,7 +54,6 @@ class CardController extends Controller
         return response()->json([
             'message' => 'Card saved successfully!',
             'credit_limit' => $user->fresh()->credit_limit,
-            'balance' => $user->fresh()->balance,
         ]);
     }
 }
