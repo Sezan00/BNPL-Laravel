@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\InstallMentController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
@@ -22,8 +23,11 @@ Route::middleware('auth:sanctum')->group(function () {
     //fetching user data to user dashboard
     Route::get('/user-data', [AuthController::class, 'index']);
     Route::post('logout', [AuthController::class, 'logout']);
-
+    //stripe card store
     Route::get('card/setup-intent', [CardController::class, 'create']);
     Route::post('card/store', [CardController::class, 'store']);
     Route::post('send-payment', [PaymentController::class, 'sendPayment']);
+
+    //installment show
+    Route::get('installment', [InstallMentController::class, 'showInstallment']);
 });

@@ -15,4 +15,5 @@ class InstallmentPackeg extends Model
         'min_amount',
         'is_active'
     ];
+
 }
