@@ -11,6 +11,7 @@ use App\Models\InstallmentPackeg;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -33,6 +34,13 @@ class InstallmentPackegResource extends Resource
         TextInput::make('name')
             ->required()
             ->maxLength(255),
+        Select::make('term')
+               ->label('Payment Term')
+               ->options([
+                 'weekly' => 'Weekly',
+                 'bi_weekly' => 'Bi-Weekly',
+                 'monthly' => 'Monthly',
+               ]),
 
         TextInput::make('installment_count')
             ->numeric()
@@ -49,10 +57,6 @@ class InstallmentPackegResource extends Resource
         ->suffix('%')
         ->default(0),
 
-        TextInput::make('min_amount')
-            ->numeric()
-            ->required()
-            ->prefix('$'),
 
         Toggle::make('is_active')
             ->default(true),
@@ -64,10 +68,17 @@ class InstallmentPackegResource extends Resource
         return $table
                 ->columns([
                     TextColumn::make('name')->label('Name'),
+                   TextColumn::make('term')
+                        ->label('Term')
+                        ->formatStateUsing(fn ($state) => match ($state) {
+                            'weekly' => 'Weekly',
+                            'bi_weekly' => 'Bi-Weekly',
+                            'monthly' => 'Monthly',
+                            default => $state,
+                        }),
                     TextColumn::make('installment_count')->label('Installment Count'),
-                    TextColumn::make('fixed_profit')->label('Fixed Profit')->money('bdt', true),
+                    TextColumn::make('fixed_profit')->label('Fixed Profit')->money('usd', true),
                     TextColumn::make('interest_percent')->label('Interest Percent')->suffix('%'),
-                    TextColumn::make('min_amount')->label('Minimum Amount')->money('bdt', true),
                 ])
                 ->recordActions([
                     EditAction::make(),

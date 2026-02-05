@@ -9,10 +9,10 @@ class InstallmentPackeg extends Model
     protected $table = 'installment_packeges';
      protected $fillable = [
         'name',
+        'term',
         'installment_count',
-        'fixed_profit',
         'interest_percent',
-        'min_amount',
+        'fixed_profit',
         'is_active'
     ];
 

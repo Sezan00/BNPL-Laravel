@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('installment_packeges', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->enum('term', ['weekly', 'bi_weekly', 'monthly']);
             $table->unsignedTinyInteger('installment_count');
             $table->decimal('interest_percent', 5, 2)->default(0); 
             $table->decimal('fixed_profit', 10,2)->default(0);
-            $table->decimal('min_amount', 12, 2);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
