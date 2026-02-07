@@ -32,4 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('installment', [InstallMentController::class, 'showInstallment']);
     //installment 
     Route::post('paylater/preview', [InstallMentController::class, 'preview']);
+
+    // installment pay 
+    Route::post('paylater/confirm', [InstallMentController::class, 'confirmPayment']);
 });

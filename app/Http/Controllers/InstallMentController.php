@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Installment;
 use App\Models\InstallmentPackeg;
+use App\Models\InstallmentSchedule;
 use App\Models\Merchant;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 use function Symfony\Component\Clock\now;
 
@@ -63,5 +67,74 @@ class InstallMentController extends Controller
             'total_payable' => round($total_payable, 2),
             'installments' => $installments
         ]);
+    }
+
+
+    public function confirmPayment(Request $request){
+        $user = Auth::user();
+        $amount = $request->amount;
+        $package_id = $request->package_id;
+        $phone = $request->phone;
+
+
+        $merchant = Merchant::where('phone', $phone)->first();
+        if(!$merchant) return response()->json(['error'=>'Merchant not found'], 404);
+
+        if($user->credit_limit <$amount){
+            return response()->json(['error' => 'Insufficient credit limit'], 403);
+        }
+
+        DB::beginTransaction();
+        try{
+
+            $payment = Payment::create([
+                'sender_id' => $user->id,
+                'receiver_id' => $merchant->id,
+                'receiver_type' => 'merchant',
+                'payment_type' => 'pay_later',
+                'amount'        => $amount,
+                'status'        => 'success'
+            ]);
+
+        $package = InstallmentPackeg::find($package_id);
+        $interest = ($amount * $package->interest_percent / 100) + $package->fixed_profit;
+        $totalPayable  = $amount + $interest;
+
+        $installment = Installment::create([
+            'user_id' => $user->id,
+            'merchant_id' => $merchant->id,
+            'payment_id'  => $payment->id,
+            'package_id'  => $package_id,
+            'principal_amount' => $amount,
+            'interest_amount'  => $interest,
+            'total_payable'    => $totalPayable,
+            'remaining_balance' => $totalPayable,
+            'status' => 'active',
+        ]);
+
+        for($i = 1; $i<=$package->installment_count; $i++){
+            InstallmentSchedule::create([
+                'installment_id' => $installment->id,
+                'installment_no' => $i,
+                'amount' => round($totalPayable / $package->installment_count, 2),
+                'due_date' => Carbon::now()->addDays(ceil($package->term_in_days / $package->installment_count * $i)),
+                'status' => 'pending'
+            ]);
+        }
+
+        $user->credit_limit -= $amount;
+        $user->used_credit += $amount;
+        $user->save();
+
+        DB::commit();
+           return response()->json([
+            'success' => true,
+            'message' => 'Payment completed'
+        ], 200);
+
+        } catch (\Exception $e){
+            DB::rollback();
+            return response()->json(['error'=>$e->getMessage()], 500);
+        }
     }
 }

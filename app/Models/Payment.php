@@ -11,6 +11,7 @@ class Payment extends Model
         'receiver_type', 
         'receiver_id',
         'amount',
-        'status',        
+        'status',
+        'payment_type'        
     ];
 }

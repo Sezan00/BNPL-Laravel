@@ -78,9 +78,10 @@ class AuthController extends Controller
         $user = Auth::user();
 
         return response()->json([
-             'name' => $user->name,
+            'name' => $user->name,
             'email' => $user->email,
             'balance' => $user->balance,
+            'credit_limit' => $user->credit_limit
         ]);
     }
 }
