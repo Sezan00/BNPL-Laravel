@@ -81,7 +81,8 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'balance' => $user->balance,
-            'credit_limit' => $user->credit_limit
+            'credit_limit' => $user->credit_limit,
+            'used_credit'  => $user->used_credit
         ]);
     }
 }

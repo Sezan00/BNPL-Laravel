@@ -17,4 +17,8 @@ class InstallmentSchedule extends Model
         'status',
         'paid_at',
     ];
+
+    public function installment(){
+    return $this->belongsTo(Installment::class);
+    }
 }

@@ -35,4 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // installment pay 
     Route::post('paylater/confirm', [InstallMentController::class, 'confirmPayment']);
+
+    //installment show 
+    Route::get('user/installments', [InstallMentController::class, 'userInstallments']);
 });

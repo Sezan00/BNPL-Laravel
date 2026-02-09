@@ -15,9 +15,18 @@ class Installment extends Model
         'payment_id',
         'package_id',
         'principal_amount',
+        'paid_amount',
         'interest_amount',
         'total_payable',
         'remaining_balance',
         'status',
     ];
+
+    public function merchant(){
+        return $this->belongsTo(Merchant::class);
+    }
+
+    public function schedules(){
+        return $this->hasMany(InstallmentSchedule::class, 'installment_id');
+    }
 }

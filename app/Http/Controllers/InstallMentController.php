@@ -137,4 +137,36 @@ class InstallMentController extends Controller
             return response()->json(['error'=>$e->getMessage()], 500);
         }
     }
+
+
+
+    public function userInstallments(Request $request){
+          $user = $request->user();
+
+          $installment = Installment::with('merchant', 'schedules')->where('user_id', $user->id)->get();
+        
+          $result = $installment->map(function($inst){
+            return [
+                'installment_id' => $inst->id,
+                'merchant_name' => $inst->merchant->merchant_name,
+                'business_name' => $inst->merchant->business_name,
+                'total_payable' => $inst->total_payable,
+                'paid_amount' => $inst->paid_amount,
+                'remaining_balance' => $inst->remaining_balance,
+                'status' => $inst->status,
+                'schedules' => $inst->schedules->map(function($s){
+                    return [
+                    'schedule_id' => $s->id,
+                    'installment_no' => $s->installment_no,
+                    'amount' => $s->amount,
+                    'due_date' => $s->due_date,
+                    'status' => $s->status,
+                    ];
+                }),
+            ];
+          });
+
+          return response()->json($result);
+          
+    }
 }
