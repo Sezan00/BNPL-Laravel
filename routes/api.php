@@ -38,4 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //installment show 
     Route::get('user/installments', [InstallMentController::class, 'userInstallments']);
+
+    Route::post('installment/pay', [InstallMentController::class, 'InstallmentPayNow']);
 });

@@ -29,15 +29,6 @@ class CardController extends Controller
 
         $user->addPaymentMethod($paymentMethodID);
         $user->updateDefaultPaymentMethod($paymentMethodID);
-
-        // $extraCredit = 500;
-            // if (bccomp($user->credit_limit, '0.00', 2) === 0) {
-            //     $update = $user->update([
-            //         'credit_limit' => $extraCredit,
-            //         'balance' => $user->balance + $extraCredit,
-            //     ]);
-            // }
-
             
          $extraCredit = 500;
 
