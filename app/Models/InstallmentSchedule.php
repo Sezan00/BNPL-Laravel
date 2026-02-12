@@ -10,6 +10,7 @@ class InstallmentSchedule extends Model
     use HasFactory;
     protected $table = 'installment_schedule';
      protected $fillable = [
+        'stripe_payment_id',
         'installment_id',
         'installment_no',
         'amount',

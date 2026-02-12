@@ -5,6 +5,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\InstallMentController;
 use App\Http\Controllers\MerchantController;
+use App\Http\Controllers\PayInstallmentController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 //user Account
@@ -40,4 +41,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user/installments', [InstallMentController::class, 'userInstallments']);
 
     Route::post('installment/pay', [InstallMentController::class, 'InstallmentPayNow']);
+    
+    //pay single installment
+
+    Route::post('installments/pay-single', [PayInstallmentController::class, 'SingleInstallment']);
+
+    //show all installment pay Data
+
+    Route::get('pending-all-installment/{installmentID}', [PayInstallmentController::class, 'ShowAllInstamentData']);
+
+    Route::post('pay-all-installment',[PayInstallmentController::class, 'PayAllInstallment']);
+
+
 });
