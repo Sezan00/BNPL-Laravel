@@ -26,6 +26,10 @@ class Installment extends Model
         return $this->belongsTo(Merchant::class);
     }
 
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
     public function schedules(){
         return $this->hasMany(InstallmentSchedule::class, 'installment_id');
     }

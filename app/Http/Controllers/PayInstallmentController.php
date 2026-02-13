@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class PayInstallmentController extends Controller
 {
+
+   //pay single installment
     public function SingleInstallment(Request $request)
     {
         $user = Auth::user();
