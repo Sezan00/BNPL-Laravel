@@ -11,6 +11,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use function Symfony\Component\Clock\now;
 
@@ -33,66 +34,65 @@ class ChargeInstallmentJob implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
-            $schedule = InstallmentSchedule::with('installment.user')
-                ->find($this->scheduleId);
+        $schedule = InstallmentSchedule::with('installment.user')->find($this->scheduleId);
+        if (!$schedule || $schedule->status !== 'pending') return;
 
-            if (!$schedule || $schedule->status !== 'pending') {
-                return;
-            }
+        $user = $schedule->installment->user;
+        $amount = $schedule->amount;
 
-            $user = $schedule->installment->user;
-            $amount = $schedule->amount;
+        try {
+            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $paymentIntent = $stripe->paymentIntents->create([
+                'amount' => $amount * 100,
+                'currency' => 'usd',
+                'customer' => $user->stripe_id,
+                'payment_method' => $user->defaultPaymentMethod()->id,
+                'off_session' => true,
+                'confirm' => true,
+            ]);
+            // Log::info("Stripe charge success: " . $paymentIntent->id);
+        } catch (\Exception $e) {
+            $schedule->update(['status' => 'failed']);
+            Log::error("Stripe charge failed: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            throw $e;  
+        }
 
 
-            $user->charge(
-                $amount * 100,
-             $payMethod = $user->defaultPaymentMethod()->id
-            );
-
-            if(!$payMethod){
-                 $schedule->update(['status' => 'failed']);
-                 return;   
-            }
-
-        
-
-         $payment = Payment::create([
+        // Stripe charge success → DB update
+        DB::transaction(function () use ($schedule, $amount, $user, $paymentIntent) {
+            $payment = Payment::create([
+                'stripe_id' => $paymentIntent->id,
                 'sender_id' => $user->id,
-                'receiver_type' => 'platform',
+                'receiver_type' => 'provider',
                 'receiver_id' => null,
                 'installment_schedule_id' => $schedule->id,
                 'amount' => $amount,
                 'status' => 'success',
-                'payment_type' => 'pay_later'
+                'payment_type' => 'pay_later',
             ]);
 
             $schedule->update([
                 'status' => 'paid',
                 'paid_at' => now(),
-             ]);
-        
-             $installment = $schedule->installment;
-             $installment->paid_amount += $amount;
-             $installment->remaining_balance -= $amount;
+            ]);
 
-             if($installment->remaining_balance <=0){
+            $installment = $schedule->installment;
+            $installment->paid_amount += $amount;
+            $installment->remaining_balance -= $amount;
+            if ($installment->remaining_balance <= 0) {
                 $installment->status = 'closed';
-             }
+            }
+            $installment->save();
 
-             $installment->save();
-
-
-           Ledger::create([
+            Ledger::create([
                 'user_id' => $user->id,
                 'payment_id' => $payment->id,
                 'type' => 'debit',
                 'amount' => $amount,
-                'balance_after' => $user->credit_limit,
-                'description' => 'EMI payment'
+                'balance_after' => null,
+                'description' => 'EMI payment',
             ]);
-
-
         });
     }
 }
