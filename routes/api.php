@@ -57,4 +57,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('recent/transaction', [TransactionController::class, 'TransactionIndex']);
     //fetch Merchant
     Route::get('get-merchant/{phone}', [MerchantController::class, 'fetchMerchant']);
+
 });

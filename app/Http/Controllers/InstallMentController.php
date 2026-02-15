@@ -183,7 +183,7 @@ class InstallMentController extends Controller
     {
         $user = $request->user();
 
-        $installment = Installment::with('merchant', 'schedules')->where('user_id', $user->id)->get();
+        $installment = Installment::with('merchant', 'schedules')->where('user_id', $user->id)->latest()->get();
 
         $result = $installment->map(function ($inst) {
             return [
