@@ -41,44 +41,44 @@ class PaymentController extends Controller
         try {
             DB::beginTransaction();
 
-            $payment = Payment::create([
-                'sender_id'     => $sender->id,
-                'receiver_type' => $receiverType,
-                'amount'        => $request->amount,
-                'receiver_id'   => $receiver->id,
-                'status'        => 'success'
-            ]);
+        // Payment record
+        $payment = Payment::create([
+            'sender_id'     => $sender->id,
+            'receiver_type' => $receiverType,
+            'amount'        => $request->amount,
+            'receiver_id'   => $receiver->id,
+            'status'        => 'success'
+        ]);
 
-            Transaction::create([
-                'user_id' => $receiverType === 'user' ? $receiver->id : null,
-                'merchant_id' => $receiverType === 'merchant' ? $receiver->id : null,
-                'type' => 'credit',
-                'amount' => $request->amount,
-                'balance_after' => $receiver->balance + $request->amount,
-                'payment_id' => $payment->id,
-                'description' => "Payment received from user {$sender->id}",
-            ]);
+        // Sender transaction (debit)
+        Transaction::create([
+            'user_id' => $sender->id,
+            'type' => 'debit',
+            'amount' => $request->amount,
+            'balance_after' => $sender->balance - $request->amount,
+            'payment_id' => $payment->id,
+            'description' => "Payment sent to {$receiverType} {$receiver->id}"
+        ]);
 
-            $sender->decrement('balance', $request->amount);
+        // Deduct sender balance
+        $sender->decrement('balance', $request->amount);
 
-            $transactionData = [
-                'type' => 'credit',
-                'amount' => $request->amount,
-                'balance_after' => $receiver->balance + $request->amount,
-                'payment_id' => $payment->id,
-                'description' => "Payment received from user {$sender->id}"
-            ];
+        // Receiver transaction (credit)
+        Transaction::create([
+            'user_id' => $receiverType === 'user' ? $receiver->id : null,
+            'merchant_id' => $receiverType === 'merchant' ? $receiver->id : null,
+            'type' => 'credit',
+            'amount' => $request->amount,
+            'balance_after' => $receiver->balance + $request->amount,
+            'payment_id' => $payment->id,
+            'description' => "Payment received from user {$sender->id}"
+        ]);
 
-            if ($receiverType === 'user') {
-                $transactionData['user_id'] = $receiver->id;
-            } else {
-                $transactionData['merchant_id'] = $receiver->id;
-            }
+        // Add receiver balance
+        $receiver->increment('balance', $request->amount);
 
-            Transaction::create($transactionData);
-            $receiver->increment('balance', $request->amount);
+        DB::commit();
 
-            DB::commit();
 
             return response()->json([
                 'message' => 'Payment successful',

@@ -7,6 +7,7 @@ use App\Http\Controllers\InstallMentController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PayInstallmentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 //user Account
 Route::post('register', [AuthController::class, 'register']);
@@ -52,5 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('pay-all-installment',[PayInstallmentController::class, 'PayAllInstallment']);
 
-
+    //show recent transaction
+    Route::get('recent/transaction', [TransactionController::class, 'TransactionIndex']);
+    //fetch Merchant
+    Route::get('get-merchant/{phone}', [MerchantController::class, 'fetchMerchant']);
 });

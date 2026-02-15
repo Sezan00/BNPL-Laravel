@@ -73,4 +73,14 @@ class MerchantController extends Controller
             'message' => 'Merchant logout successful'
         ], 200);
     }
+
+    public function fetchMerchant($phone){
+        $merchant = Merchant::where('phone', $phone)->first();
+
+        if(!$merchant) {
+            return response()->json(['message' => 'merchante not found']);
+        }
+
+        return response()->json([$merchant]);
+    } 
 }
