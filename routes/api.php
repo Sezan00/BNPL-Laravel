@@ -7,6 +7,7 @@ use App\Http\Controllers\InstallMentController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\PayInstallmentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SettlementAccountController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 //user Account
@@ -40,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user/installments', [InstallMentController::class, 'userInstallments']);
 
     Route::post('installment/pay', [InstallMentController::class, 'InstallmentPayNow']);
-    
+
     //pay single installment
 
     Route::post('installments/pay-single', [PayInstallmentController::class, 'SingleInstallment']);
@@ -49,20 +50,33 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('pending-all-installment/{installmentID}', [PayInstallmentController::class, 'ShowAllInstamentData']);
 
-    Route::post('pay-all-installment',[PayInstallmentController::class, 'PayAllInstallment']);
+    Route::post('pay-all-installment', [PayInstallmentController::class, 'PayAllInstallment']);
 
     //show recent transaction
     Route::get('recent/transaction', [TransactionController::class, 'TransactionIndex']);
     //fetch Merchant
     Route::get('get-merchant/{phone}', [MerchantController::class, 'fetchMerchant']);
-
 });
 
 
 
 Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController::class, 'merchantLogout']);
 
-Route::middleware('auth:merchant')->group(function(){
+Route::middleware('auth:merchant')->group(function () {
     Route::get('merchant/profile', [MerchantController::class, 'indexMerchant']);
     Route::get('merchant/transaction', [TransactionController::class, 'indexMerchantTransaction']);
+    // Create new bank account
+    Route::post(
+        '/merchant/settlement-accounts',
+        [SettlementAccountController::class, 'store']
+    );
+
+     Route::get('/merchant/settlement-accounts',
+        [SettlementAccountController::class, 'index']);
+
+    // Change active account
+    Route::post(
+        '/merchant/settlement-accounts/{id}/activate',
+        [SettlementAccountController::class, 'activate']
+    );
 });

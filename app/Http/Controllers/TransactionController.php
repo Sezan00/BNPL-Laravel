@@ -8,22 +8,32 @@ use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
-    public function TransactionIndex(){
-        $user = Auth::user();
+  public function TransactionIndex()
+  {
+    $user = Auth::user();
 
-      $transaction = Transaction::where('user_id', $user->id)->latest()->get();
+    $transaction = Transaction::where('user_id', $user->id)->latest()->get();
 
-      return response()->json([
-        'status' => true,
-        'data'  => $transaction
-      ]);
-    }
+    return response()->json([
+      'status' => true,
+      'data'  => $transaction
+    ]);
+  }
 
-    public function indexMerchantTransaction(){
-      $merchant = Auth::user();
+  public function indexMerchantTransaction()
+  {
+    $merchant = Auth::user();
 
-      $transaction = Transaction::where('merchant_id', $merchant->id)->latest()->get();
+    $transactions = Transaction::with('user')
+      ->where('merchant_id', $merchant->id)
+      ->whereHas('payment', fn($q) => $q->where('receiver_type', 'merchant'))
+      ->latest()
+      ->get();
 
-      return response()->json(['statuas' => true, 'data' => $transaction]);
-    }
+
+    return response()->json([
+      'status' => true,
+      'data' => $transactions
+    ]);
+  }
 }

@@ -16,4 +16,8 @@ class Payment extends Model
         'status',
         'payment_type'        
     ];
+    public function user() {
+    return $this->belongsTo(User::class, 'sender_id');
+}
+
 }

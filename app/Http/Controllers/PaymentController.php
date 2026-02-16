@@ -21,18 +21,11 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:1',
         ]);
 
-        $receiver     = null;
-        $receiverType = null;
+
 
         $merchant = Merchant::where('phone', $request->phone)->first();
-        if ($merchant) {
-            $receiver = $merchant;
-            $receiverType = 'merchant';
-        } else {
-            $user = User::where('phone', $request->phone)->first();
-            if (!$user) return response()->json(['Receiver not found'], 401);
-            $receiver = $user;
-            $receiverType = 'user';
+        if (!$merchant) {
+            return response()->json(['message' => 'Merchant not found'], 404);
         }
 
         if ($sender->balance < $request->amount)
@@ -41,48 +34,48 @@ class PaymentController extends Controller
         try {
             DB::beginTransaction();
 
-        // Payment record
-        $payment = Payment::create([
-            'sender_id'     => $sender->id,
-            'receiver_type' => $receiverType,
-            'amount'        => $request->amount,
-            'receiver_id'   => $receiver->id,
-            'status'        => 'success'
-        ]);
+            // Payment record
+            $payment = Payment::create([
+                'sender_id'     => $sender->id,
+                'receiver_type' => 'merchant',
+                'amount'        => $request->amount,
+                'receiver_id'   => $merchant->id,
+                'status'        => 'success'
+            ]);
 
-        // Sender transaction (debit)
-        Transaction::create([
-            'user_id' => $sender->id,
-            'type' => 'debit',
-            'amount' => $request->amount,
-            'balance_after' => $sender->balance - $request->amount,
-            'payment_id' => $payment->id,
-            'description' => "Payment sent to {$receiverType} {$receiver->id}"
-        ]);
+            // Sender transaction (debit)
+            Transaction::create([
+                'user_id' => $sender->id,
+                'type' => 'debit',
+                'amount' => $request->amount,
+                'balance_after' => $sender->balance - $request->amount,
+                'payment_id' => $payment->id,
+                'description' => "Payment sent to {$merchant->id}"
+            ]);
 
-        // Deduct sender balance
-        $sender->decrement('balance', $request->amount);
+            // Deduct sender balance
+            $sender->decrement('balance', $request->amount);
 
-        // Receiver transaction (credit)
-        Transaction::create([
-            'user_id' => $receiverType === 'user' ? $receiver->id : null,
-            'merchant_id' => $receiverType === 'merchant' ? $receiver->id : null,
-            'type' => 'credit',
-            'amount' => $request->amount,
-            'balance_after' => $receiver->balance + $request->amount,
-            'payment_id' => $payment->id,
-            'description' => "Payment received from user {$sender->id}"
-        ]);
+            // Receiver transaction (credit)
+            Transaction::create([
+                'user_id' => $sender->id,
+                'merchant_id' => $merchant->id,
+                'type' => 'credit',
+                'amount' => $request->amount,
+                'balance_after' => $merchant->balance + $request->amount,
+                'payment_id' => $payment->id,
+                'description' => "Payment received from user {$sender->id}"
+            ]);
 
-        // Add receiver balance
-        $receiver->increment('balance', $request->amount);
+            // Add receiver balance
+            $merchant->increment('balance', $request->amount);
 
-        DB::commit();
+            DB::commit();
 
 
             return response()->json([
                 'message' => 'Payment successful',
-                'receiver_type' => $receiverType
+                'receiver_type' => 'merchant'
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
