@@ -24,6 +24,14 @@ class InstallMentController extends Controller
             return response()->json(['message' => 'unauthorize']);
         }
 
+         if ($user->credit_limit <= 0) {
+        return response()->json([
+            'credit_limit' => 0,
+            'installments' => [],
+            'message' => 'No credit limit available'
+        ]);
+    }
+
         $installments  = InstallmentPackeg::where('is_active', 1)->get();
 
         return response()->json([

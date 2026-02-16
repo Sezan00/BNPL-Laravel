@@ -18,8 +18,6 @@ Route::post('register/merchant', [MerchantController::class, 'register']);
 Route::post('login/merchant', [MerchantController::class, 'login']);
 Route::get('document', [DocumentController::class, 'index']);
 
-Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController::class, 'merchantLogout']);
-
 
 Route::middleware('auth:sanctum')->group(function () {
     //fetching user data to user dashboard
@@ -58,4 +56,13 @@ Route::middleware('auth:sanctum')->group(function () {
     //fetch Merchant
     Route::get('get-merchant/{phone}', [MerchantController::class, 'fetchMerchant']);
 
+});
+
+
+
+Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController::class, 'merchantLogout']);
+
+Route::middleware('auth:merchant')->group(function(){
+    Route::get('merchant/profile', [MerchantController::class, 'indexMerchant']);
+    Route::get('merchant/transaction', [TransactionController::class, 'indexMerchantTransaction']);
 });

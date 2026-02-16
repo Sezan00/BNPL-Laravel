@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Merchant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -83,4 +84,11 @@ class MerchantController extends Controller
 
         return response()->json([$merchant]);
     } 
+
+
+    public function indexMerchant(){
+        $merchant = Auth::user(); 
+
+       return response()->json($merchant);
+    }
 }

@@ -18,4 +18,12 @@ class TransactionController extends Controller
         'data'  => $transaction
       ]);
     }
+
+    public function indexMerchantTransaction(){
+      $merchant = Auth::user();
+
+      $transaction = Transaction::where('merchant_id', $merchant->id)->latest()->get();
+
+      return response()->json(['statuas' => true, 'data' => $transaction]);
+    }
 }
