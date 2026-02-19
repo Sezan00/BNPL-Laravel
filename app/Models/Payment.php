@@ -9,15 +9,27 @@ class Payment extends Model
     protected $fillable = [
         'installment_schedule_id',
         'stripe_id',
-        'sender_id', 
-        'receiver_type', 
+        'sender_id',
+        'receiver_type',
         'receiver_id',
         'amount',
         'status',
-        'payment_type'        
+        'payment_type',
+        'settled_status'
     ];
-    public function user() {
-    return $this->belongsTo(User::class, 'sender_id');
-}
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
 
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class, 'receiver_id');
+    }
+
+    public function scopeUnsettled($query)
+    {
+        return $query->where('receiver_type', 'merchant')
+            ->where('settled_status', 0); 
+    }
 }

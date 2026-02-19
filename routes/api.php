@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SettlementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\DocumentController;
@@ -58,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-merchant/{phone}', [MerchantController::class, 'fetchMerchant']);
 });
 
+Route::get('/admin/settlements/generate', [SettlementController::class, 'generate'])->name('admin.settlements.generate');
 
 
 Route::middleware('auth:merchant')->post('merchant/logout', [MerchantController::class, 'merchantLogout']);

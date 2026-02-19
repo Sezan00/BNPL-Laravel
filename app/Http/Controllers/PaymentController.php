@@ -14,7 +14,6 @@ class PaymentController extends Controller
 {
     public function sendPayment(Request $request)
     {
-
         $sender = Auth::user();
         $request->validate([
             'phone'  => 'required',
