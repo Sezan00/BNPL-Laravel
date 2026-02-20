@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Installment;
 use App\Models\InstallmentSchedule;
+use App\Models\MerchantFee;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +43,11 @@ class PayInstallmentController extends Controller
                     'allow_redirects' => 'never',
                 ],
             ]);
+                // $amount = $schedule->amount;
+                // $feePercentage = 2;
+                // $feeAmount = ($amount * $feePercentage / 100);
+                // $netAmount = $amount - $feeAmount;
+
             Transaction::create([
                 'user_id'        => $user->id,
                 'merchant_id'    => $installment->merchant_id,
@@ -51,6 +57,15 @@ class PayInstallmentController extends Controller
                 'payment_id'     => $installment->payment_id,
                 'description'    => 'Installment #' . $schedule->installment_no . 'paid',
             ]);
+            
+            //    MerchantFee::create([
+            //         'payment_id' => $installment->payment_id,
+            //         'merchant_id' => $installment->merchant_id,
+            //         'gross_amount' => $amount,
+            //         'fee_percentage' => $feePercentage,
+            //         'fee_amount' => $feeAmount,
+            //         'net_amount' => $netAmount,
+            //     ]);
 
             $schedule->update([
                 'status' => 'paid',

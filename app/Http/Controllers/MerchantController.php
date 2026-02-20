@@ -87,7 +87,9 @@ class MerchantController extends Controller
 
 
     public function indexMerchant(){
-        $merchant = Auth::user(); 
+        $merchant = Auth::user();
+        
+        $merchant_balance = $merchant->balance;
 
        return response()->json($merchant);
     }

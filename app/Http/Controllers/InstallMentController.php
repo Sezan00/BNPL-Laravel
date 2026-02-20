@@ -6,6 +6,7 @@ use App\Models\Installment;
 use App\Models\InstallmentPackeg;
 use App\Models\InstallmentSchedule;
 use App\Models\Merchant;
+use App\Models\MerchantFee;
 use App\Models\Payment;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -127,7 +128,21 @@ class InstallMentController extends Controller
                 'status'        => 'success'
             ]);
 
-            $merchant->balance += $amount;
+            $fee = 2;
+            $ammountFee = ($amount * $fee) / 100;
+            $netAmount   = $amount - $ammountFee;
+
+            MerchantFee::create([
+                'payment_id'   => $payment->id,
+                'merchant_id'  => $merchant->id,
+                'gross_amount' => $amount,
+                'fee_percentage' => $fee,
+                'fee_amount'   => $ammountFee,
+                'net_amount'   => $netAmount,
+            ]);
+
+
+            $merchant->balance += $netAmount;
             $merchant->save();
 
             $user->credit_limit -= $amount;

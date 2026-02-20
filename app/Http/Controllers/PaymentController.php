@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Merchant;
+use App\Models\MerchantFee;
 use App\Models\Payment;
 use App\Models\Transaction;
 use App\Models\User;
@@ -20,8 +21,6 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:1',
         ]);
 
-
-
         $merchant = Merchant::where('phone', $request->phone)->first();
         if (!$merchant) {
             return response()->json(['message' => 'Merchant not found'], 404);
@@ -32,6 +31,11 @@ class PaymentController extends Controller
 
         try {
             DB::beginTransaction();
+
+            $amount = $request->amount;
+            $feePercentage = 2;
+            $feeAmount = ($amount * $feePercentage / 100);
+            $netAmount = $amount - $feeAmount;
 
             // Payment record
             $payment = Payment::create([
@@ -55,19 +59,29 @@ class PaymentController extends Controller
             // Deduct sender balance
             $sender->decrement('balance', $request->amount);
 
+            MerchantFee::create([
+                'payment_id' => $payment->id,
+                'merchant_id' => $merchant->id,
+                'gross_amount' => $amount,
+                'fee_percentage' => $feePercentage,
+                'fee_amount'  => $feeAmount,
+                'net_amount' => $netAmount,
+            ]);
+            
+
             // Receiver transaction (credit)
             Transaction::create([
-                'user_id' => $sender->id,
+                // 'user_id' => $sender->id,
                 'merchant_id' => $merchant->id,
                 'type' => 'credit',
-                'amount' => $request->amount,
-                'balance_after' => $merchant->balance + $request->amount,
+                'amount' => $netAmount,
+                'balance_after' => $merchant->balance + $netAmount,
                 'payment_id' => $payment->id,
                 'description' => "Payment received from user {$sender->id}"
             ]);
 
             // Add receiver balance
-            $merchant->increment('balance', $request->amount);
+            $merchant->increment('balance', $netAmount);
 
             DB::commit();
 
