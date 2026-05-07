@@ -34,3 +34,8 @@ This project was built to implement a real-world BNPL (Buy Now, Pay Later) syste
 - 💰 Payment Tracking
 - 📊 Transaction History
 - 🔐 Authentication & Authorization
+
+
+## 🎥 Demo Video
+
+[![Watch Demo](https://img.youtube.com/vi/odTBn4ikMFU/0.jpg)](https://youtu.be/odTBn4ikMFU)
